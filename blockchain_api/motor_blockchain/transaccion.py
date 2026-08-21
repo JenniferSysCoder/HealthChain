@@ -21,6 +21,9 @@ class Transaccion:
     def get_id(self):
         return self.id
 
+    def get_time_stamp(self):
+        return self.time_stamp
+
     def get_sender(self):
         return self.sender
 
