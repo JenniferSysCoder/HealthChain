@@ -1,6 +1,6 @@
 import time
 
-from .transaccion import Transaccion
+from .registro_clinico import RegistroClinico
 
 
 class Bloque:
@@ -8,7 +8,7 @@ class Bloque:
         self.id = pId
         self.time_stamp = int(time.time() * 1000)
         self.previous_hash = pPrevHash
-        self.a_transactions = []
+        self.a_registros = []
         self.nonce = -1
         self.hash = None
 
@@ -19,26 +19,29 @@ class Bloque:
             return True
         return False
 
-    def set_transaction_data(self, pSender, pAmount, pReceiver):
-        self.a_transactions.append(
-            Transaccion(len(self.a_transactions), pSender, pReceiver, pAmount)
-        )
-
-    def set_transaction_obj(self, pTran):
-        self.a_transactions.append(
-            Transaccion(
-                len(self.a_transactions),
-                pTran.get_sender(),
-                pTran.get_receiver(),
-                pTran.get_amount(),
+    def set_registro_clinico(self, pEntidad, pPaciente, pCategoria, pDatosCifrados):
+        self.a_registros.append(
+            RegistroClinico(
+                len(self.a_registros), pEntidad, pPaciente, pCategoria, pDatosCifrados
             )
         )
 
-    def get_transaction(self, pId):
-        return self.a_transactions[pId]
+    def set_registro_obj(self, pReg):
+        self.a_registros.append(
+            RegistroClinico(
+                len(self.a_registros),
+                pReg.get_entidad_emisora(),
+                pReg.get_paciente_id(),
+                pReg.get_categoria(),
+                pReg.get_datos_cifrados(),
+            )
+        )
 
-    def count_transactions(self):
-        return len(self.a_transactions)
+    def get_registro(self, pId):
+        return self.a_registros[pId]
+
+    def count_registros(self):
+        return len(self.a_registros)
 
     def get_id(self):
         return self.id
@@ -54,6 +57,6 @@ class Bloque:
 
     def to_string(self):
         sCad = str(self.id) + str(self.time_stamp) + str(self.previous_hash)
-        for tx in self.a_transactions:
-            sCad += tx.to_string()
+        for reg in self.a_registros:
+            sCad += reg.to_string()
         return sCad

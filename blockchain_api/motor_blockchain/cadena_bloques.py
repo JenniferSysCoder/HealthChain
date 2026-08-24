@@ -26,13 +26,15 @@ class BlockChain:
     def size(self):
         return len(self.block_chain)
 
-    def create_genesis_with_balance(self, pInitialBalance, pClient):
+    def create_genesis_with_record(self, pEntidad, pPaciente):
         if self.size() < 1:
             tmp_block = Bloque(
                 0, "0000000000000000000000000000000000000000000000000000000000000000"
             )
-            if pInitialBalance > 0:
-                tmp_block.set_transaction_data("0000GeNeSiS", pInitialBalance, pClient)
+            # Semilla inicial adaptada a datos médicos
+            tmp_block.set_registro_clinico(
+                "0000GeNeSiS", pPaciente, "INICIO", "HISTORIAL_CREADO"
+            )
             self.block_chain.append(tmp_block)
             self.mine_block()
             return True
@@ -52,17 +54,14 @@ class BlockChain:
         prev_hash = self.block_chain[-1].get_hash()
         self.block_chain.append(Bloque(self.size(), prev_hash))
 
-    def get_balance(self, pClient):
-        positive_amount = 0.0
-        negative_amount = 0.0
+    def get_historial_paciente(self, pPaciente):
+        historial = []
         for block in self.block_chain:
-            for j in range(block.count_transactions()):
-                tx = block.get_transaction(j)
-                if tx.get_receiver() == pClient:
-                    positive_amount += tx.get_amount()
-                elif tx.get_sender() == pClient:
-                    negative_amount += tx.get_amount()
-        return positive_amount - negative_amount
+            for j in range(block.count_registros()):
+                reg = block.get_registro(j)
+                if reg.get_paciente_id() == pPaciente:
+                    historial.append(reg)
+        return historial
 
     def get_proof_of_work_over_block(self, blk):
         cad = blk.to_string()
@@ -95,12 +94,12 @@ class BlockChain:
         except Exception:
             return None
 
-    def transaction_report(self, nBlock):
+    def registro_report(self, nBlock):
         sCad = ""
         blk = self.block_chain[nBlock]
-        for i in range(blk.count_transactions()):
-            tx = blk.get_transaction(i)
-            sCad += f"\tTransacion #{tx.get_id()}: ${tx.get_amount()}.\t({tx.get_sender()} ---> {tx.get_receiver()})\n"
+        for i in range(blk.count_registros()):
+            reg = blk.get_registro(i)
+            sCad += f"\tRegistro #{reg.get_id()}: {reg.get_categoria()}.\t({reg.get_entidad_emisora()} ---> {reg.get_paciente_id()})\n"
         return sCad
 
     def to_string(self):
