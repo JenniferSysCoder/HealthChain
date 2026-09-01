@@ -10,21 +10,26 @@ class BlockChain:
             proofChar * self.complexity
         )  # Carácter de prueba de trabajo (ej: "0000" para complejidad 4)
 
+    # Retorna la lista de bloques de la cadena de bloques
     def get_block_chain(self):
         return self.block_chain
 
+    # Observa si un bloque con el mismo ID ya existe en la cadena de bloques
     def block_exist(self, blk):
         for block in self.block_chain:
             if block.get_id() == blk.get_id():
                 return True
         return False
 
+    # Retorna el bloque en la posición index de la cadena de bloques
     def get_block(self, index):
         return self.block_chain[index]
 
+    # Retorna el último bloque de la cadena de bloques
     def get_last_block(self):
         return self.block_chain[-1]
 
+    #   Retorna el tamaño de la cadena de bloques
     def size(self):
         return len(self.block_chain)
 
@@ -33,7 +38,7 @@ class BlockChain:
             tmp_block = Bloque(
                 0, "0000000000000000000000000000000000000000000000000000000000000000"
             )
-            # Semilla inicial adaptada a datos médicos
+            # Agregamos un registro clínico inicial al bloque génesis para indicar que se ha creado el historial del paciente
             tmp_block.set_registro_clinico(
                 "0000GeNeSiS", pPaciente, "INICIO", "HISTORIAL_CREADO"
             )
@@ -123,9 +128,6 @@ class BlockChain:
            del bloque anterior en la cadena (esto es lo que realmente
            "encadena" los bloques; sin esto, alguien podría alterar un
            bloque intermedio sin que se detecte).
-
-        Retorna una tupla (es_valida, motivo). Si es_valida es False,
-        motivo describe en qué bloque y por qué falló.
         """
         if self.size() == 0:
             return False, "La cadena está vacía."

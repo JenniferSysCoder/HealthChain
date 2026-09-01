@@ -9,9 +9,10 @@ class Bloque:
         self.time_stamp = int(time.time() * 1000)
         self.previous_hash = pPrevHash
         self.a_registros = []
-        self.nonce = -1
+        self.nonce = -1  # Aún no ha sido minado, por lo que no tiene nonce es -1
         self.hash = None
 
+    # Esto va a ser llamado desde la clase BlockChain, cuando se mine el bloque, para registrar el nonce y el hash del bloque
     def register(self, pNonce, pHash):
         if self.id > -1 and self.nonce < 0 and self.hash is None:
             self.nonce = pNonce
@@ -19,10 +20,15 @@ class Bloque:
             return True
         return False
 
+    # Recibe toda la información del registro clínico y lo agrega al bloque
     def set_registro_clinico(self, pEntidad, pPaciente, pCategoria, pDatosCifrados):
         self.a_registros.append(
             RegistroClinico(
-                len(self.a_registros), pEntidad, pPaciente, pCategoria, pDatosCifrados
+                len(self.a_registros),
+                pEntidad,
+                pPaciente,
+                pCategoria,
+                pDatosCifrados,  # utilizamos len para asignar el id del registro
             )
         )
 
