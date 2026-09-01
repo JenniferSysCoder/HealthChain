@@ -5,6 +5,38 @@ from blockchain_api.motor_blockchain.cadena_bloques import BlockChain
 from blockchain_api.motor_blockchain.cifrado import Cifrado
 
 
+def _normalizar_nombre(pNombre):
+    return " ".join(pNombre.strip().upper().split())
+
+
+def verificar_nombre_consistente(bc, pPaciente, pNombreNuevo):
+    historial = bc.get_historial_paciente(pPaciente)
+    if not historial:
+        return True, None
+
+    llave_paciente = "clave_" + pPaciente.lower()
+    motor_cifrado = Cifrado(llave_paciente)
+
+    reg_reciente = historial[-1]
+    datos_descifrados = motor_cifrado.desencriptar(reg_reciente.get_datos_cifrados())
+
+    if not datos_descifrados:
+        return True, None
+
+    try:
+        datos_previos = json.loads(datos_descifrados)
+    except json.JSONDecodeError:
+        return True, None
+
+    nombre_previo = datos_previos.get("nombre", "")
+    if not nombre_previo:
+        return True, None
+
+    if _normalizar_nombre(nombre_previo) == _normalizar_nombre(pNombreNuevo):
+        return True, nombre_previo
+    return False, nombre_previo
+
+
 def mostrar_menu():
     print("\n" + "=" * 50)
     print("      HEALTHCHAIN TESTER (Consola)")
@@ -39,7 +71,6 @@ def ejecutor_tester():
                 if not caracter_clave:
                     caracter_clave = "0"
 
-                # Instanciamos la clase BlockChain real
                 bc = BlockChain(complejidad, caracter_clave)
                 bc.create_genesis()
                 genesis = bc.get_last_block()
@@ -86,16 +117,29 @@ def ejecutor_tester():
             ).strip()
             cronicas = input("Enfermedades crónicas [Ej: Asma]: ").strip()
 
-            paquete_vital = {
+            es_consistente, nombre_previo = verificar_nombre_consistente(
+                bc, paciente, nombre
+            )
+
+            # Bloqueo estricto de seguridad
+            if not es_consistente:
+                print(
+                    f"\n[!] ERROR DE SEGURIDAD: El ID '{paciente}' ya está registrado "
+                    f"bajo el nombre '{nombre_previo}'."
+                )
+                print(f"    No puedes asignar esos datos al nombre '{nombre}'.")
+                print("    Transacción cancelada. Regresando al menú principal...")
+                continue
+
+            datos_clinicos_paciente = {
                 "nombre": nombre,
                 "tipo_sangre": tipo_sangre,
                 "alergias": alergias,
                 "vacunas": vacunas,
                 "cronicas": cronicas,
             }
-            texto_plano = json.dumps(paquete_vital)
+            texto_plano = json.dumps(datos_clinicos_paciente)
 
-            # La clave será única por paciente
             llave_paciente = "clave_" + paciente.lower()
 
             try:
@@ -147,7 +191,6 @@ def ejecutor_tester():
             )
 
             if len(historial) > 0:
-                # Reconstruimos la llave del paciente para descifrar
                 llave_paciente = "clave_" + cliente.lower()
                 motor_cifrado = Cifrado(llave_paciente)
 
@@ -156,17 +199,15 @@ def ejecutor_tester():
                     print(f"    Categoría:    {reg.get_categoria()}")
                     print(f"    Hospital/Lab: {reg.get_entidad_emisora()}")
                     print(
-                        f"    Hash Cifrado: {reg.get_datos_cifrados()[:40]}... (oculto)"
+                        f"    Datos Cifrados: {reg.get_datos_cifrados()[:40]}... (oculto)"
                     )
 
-                    # ¡Aquí ocurre la magia de descifrar!
                     datos_descifrados = motor_cifrado.desencriptar(
                         reg.get_datos_cifrados()
                     )
 
                     if datos_descifrados:
                         try:
-                            # Parseamos el JSON para imprimirlo con etiquetas claras
                             datos = json.loads(datos_descifrados)
                             print("    [+] Datos Médicos Revelados:")
                             print(
@@ -202,6 +243,7 @@ def ejecutor_tester():
             for i in range(bc.size()):
                 blk = bc.get_block(i)
                 print(f"Block ID: {blk.get_id()}")
+                print(f"Hash: {blk.get_hash()}")
                 print(bc.registro_report(i))
                 print("-" * 50)
 

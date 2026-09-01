@@ -1,14 +1,14 @@
 class NodeData:
     def __init__(self, pnodeName, pIPAddress, psocketNum):
-        self.nodeName = pnodeName
-        self.IPAddress = pIPAddress
-        self.socketNum = psocketNum
+        self.node_name = pnodeName
+        self.ip_address = pIPAddress
+        self.socket_num = psocketNum
 
     def get_node_name(self):
-        return self.nodeName
+        return self.node_name
 
     def get_ip_address(self):
-        return self.IPAddress
+        return self.ip_address
 
     def get_socket_num(self):
-        return self.socketNum
+        return self.socket_num

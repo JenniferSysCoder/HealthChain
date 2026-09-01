@@ -4,9 +4,11 @@ from .sha256 import SHA256
 
 class BlockChain:
     def __init__(self, iComplexity, proofChar):
-        self.block_chain = []
-        self.complexity = iComplexity
-        self.proof_of_work = proofChar * self.complexity
+        self.block_chain = []  # Lista que almacena los bloques de la cadena de bloques
+        self.complexity = iComplexity  # Nivel de dificultad de la minería (1-6)
+        self.proof_of_work = (
+            proofChar * self.complexity
+        )  # Carácter de prueba de trabajo (ej: "0000" para complejidad 4)
 
     def get_block_chain(self):
         return self.block_chain
@@ -107,3 +109,53 @@ class BlockChain:
         for block in self.block_chain:
             block_chain_str += block.to_string() + "\n"
         return block_chain_str
+
+    def is_chain_valid(self):
+        """
+        Valida la integridad completa de la cadena de bloques.
+
+        Verifica, para cada bloque:
+        1. Que su hash sea consistente con su contenido y su nonce
+           (prueba de trabajo correcta).
+        2. Que su hash cumpla con la dificultad configurada
+           (self.proof_of_work).
+        3. Que su previous_hash coincida exactamente con el hash real
+           del bloque anterior en la cadena (esto es lo que realmente
+           "encadena" los bloques; sin esto, alguien podría alterar un
+           bloque intermedio sin que se detecte).
+
+        Retorna una tupla (es_valida, motivo). Si es_valida es False,
+        motivo describe en qué bloque y por qué falló.
+        """
+        if self.size() == 0:
+            return False, "La cadena está vacía."
+
+        for i, block in enumerate(self.block_chain):
+            # 1. La prueba de trabajo del bloque debe ser consistente
+            #    (el hash guardado debe corresponder a su contenido + nonce)
+            if not self.get_proof_of_work_over_block(block):
+                return (
+                    False,
+                    f"Bloque {block.get_id()} (índice {i}): el hash no corresponde a su contenido/nonce.",
+                )
+
+            # 2. El hash debe cumplir con la dificultad configurada
+            if (
+                block.get_hash() is None
+                or block.get_hash()[: self.complexity] != self.proof_of_work
+            ):
+                return (
+                    False,
+                    f"Bloque {block.get_id()} (índice {i}): el hash no cumple la dificultad requerida.",
+                )
+
+            # 3. El encadenamiento con el bloque anterior debe ser correcto
+            if i > 0:
+                bloque_anterior = self.block_chain[i - 1]
+                if block.get_previous_hash() != bloque_anterior.get_hash():
+                    return False, (
+                        f"Bloque {block.get_id()} (índice {i}): previous_hash no coincide "
+                        f"con el hash real del bloque anterior (posible alteración)."
+                    )
+
+        return True, "La cadena es válida."
