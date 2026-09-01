@@ -47,6 +47,7 @@ class BlockChain:
             return True
         return False
 
+    # Crea el bloque génesis sin registros clínicos
     def create_genesis(self):
         if self.size() < 1:
             tmp_block = Bloque(
@@ -57,6 +58,7 @@ class BlockChain:
             return True
         return False
 
+    # Crea un nuevo bloque y lo agrega a la cadena de bloques
     def create_block(self):
         prev_hash = self.block_chain[-1].get_hash()
         self.block_chain.append(Bloque(self.size(), prev_hash))
@@ -77,12 +79,12 @@ class BlockChain:
         return sHash == blk.get_hash()
 
     def add_proved_block(self, blk):
-        if not self.block_exist(blk):
-            if self.get_proof_of_work_over_block(blk):
-                self.block_chain.append(blk)
-                return True
+        if not self.block_exist(blk) and self.get_proof_of_work_over_block(blk):
+            self.block_chain.append(blk)
+            return True
         return False
 
+    # Acá se realiza la minería del bloque actual, buscando un nonce que genere un hash válido según la dificultad configurada
     def mine_block(self):
         bloque_actual = self.block_chain[-1]
         cad = bloque_actual.to_string()
@@ -98,7 +100,7 @@ class BlockChain:
     def generate_hash(self, pCad):
         try:
             return SHA256.generate_hash(pCad)
-        except Exception:
+        except Exception:  # noqa: BLE001
             return None
 
     def registro_report(self, nBlock):
