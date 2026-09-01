@@ -63,6 +63,7 @@ class BlockChain:
         prev_hash = self.block_chain[-1].get_hash()
         self.block_chain.append(Bloque(self.size(), prev_hash))
 
+    # Retorna el historial completo de registros clínicos de un paciente específico
     def get_historial_paciente(self, pPaciente):
         historial = []
         for block in self.block_chain:
@@ -72,12 +73,14 @@ class BlockChain:
                     historial.append(reg)
         return historial
 
+    # Valida la prueba de trabajo de un bloque específico comparando su hash calculado con el hash almacenado en el bloque
     def get_proof_of_work_over_block(self, blk):
         cad = blk.to_string()
         nonce = blk.get_nonce()
         sHash = self.generate_hash(cad + str(nonce))
         return sHash == blk.get_hash()
 
+    # Agrega un bloque a la cadena de bloques si no existe y si su prueba de trabajo es válida
     def add_proved_block(self, blk):
         if not self.block_exist(blk) and self.get_proof_of_work_over_block(blk):
             self.block_chain.append(blk)
@@ -86,7 +89,9 @@ class BlockChain:
 
     # Acá se realiza la minería del bloque actual, buscando un nonce que genere un hash válido según la dificultad configurada
     def mine_block(self):
-        bloque_actual = self.block_chain[-1]
+        bloque_actual = self.block_chain[
+            -1
+        ]  # Obtenemos el último bloque de la cadena para minarlo
         cad = bloque_actual.to_string()
         nonce = 0
         sHash = ""

@@ -10,6 +10,7 @@ class RegistroClinico:
         self.categoria = pCategoria
         self.datos_cifrados = pDatosCifrados
 
+    # Retorna una representación en cadena del registro clínico, concatenando sus atributos
     def to_string(self):
         return (
             str(self.id)
@@ -20,6 +21,7 @@ class RegistroClinico:
             + self.datos_cifrados
         )
 
+    # Todos estos getters son necesarios para poder acceder a los atributos del registro clínico desde la clase Bloque y desde la clase BlockChain, ya que los atributos son privados y no se pueden acceder directamente desde fuera de la clase RegistroClinico.
     def get_id(self):
         return self.id
 

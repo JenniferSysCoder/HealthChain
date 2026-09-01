@@ -138,6 +138,8 @@ def ejecutor_tester():
                 "vacunas": vacunas,
                 "cronicas": cronicas,
             }
+
+            # Convertimos los datos clínicos a JSON y luego los ciframos antes de agregarlos al bloque
             texto_plano = json.dumps(datos_clinicos_paciente)
 
             llave_paciente = "clave_" + paciente.lower()

@@ -1,4 +1,5 @@
 class NodeData:
+    # Acá se define la clase NodeData que representa la información de un nodo en la red blockchain, incluyendo su nombre, dirección IP y número de socket
     def __init__(self, pnodeName, pIPAddress, psocketNum):
         self.node_name = pnodeName
         self.ip_address = pIPAddress
